@@ -1,0 +1,84 @@
+<! Doctype html>
+<html>
+<head>
+<script type="text/javascript">
+var db = null;
+
+function createDatabase()
+{
+	db = openDatabase("Notes","1.0","HTML5 Ex",200000);
+	alert("Database Created");
+}
+
+function createNoteTable()
+{
+	db.transaction(function (tx) 
+	{
+   		tx.executeSql('CREATE TABLE IF NOT EXISTS LOGS (id unique, log)');
+		alert("Table Created");
+	});
+}
+
+function insertData()
+{
+	db.transaction(function(tx) 
+	{
+   		var id = document.getElementById("logid").value;
+		var logname = document.getElementById("logname").value;
+		tx.executeSql('INSERT INTO LOGS (id,log) VALUES (?, ?)', [id, logname]);
+		alert("Data Inserted" +id+logname);
+	});
+}
+
+function showNotes()
+{
+	db.transaction(function (tx)
+	{
+   		tx.executeSql('SELECT * FROM LOGS', [], function (tx, results)
+		{
+		   	var len = results.rows.length, i;
+		   	msg = "<p>Found rows: " + len + "</p>";
+		   	document.querySelector('#status').innerHTML =  msg;
+			var tbl = '<table ><tr><th>Name</th></tr>';
+		   	for (i = 0; i < len; i++)
+			{
+		   	   //alert(results.rows.item(i).log );tbldata
+			   tbl += "<tr><td>"+ results.rows.item(i).log +"</td></tr>";
+		   	}
+			tbl += "</table>";
+			document.getElementById("tbldata").innerHTML = tbl;
+//			document.querySelector('#tbldata').innerHTML =  tbl; style="border:2px solid #cecece; border-radius:10px;"
+	 	}, null);
+	});
+}
+
+function createNote(id, note)
+{
+	rightnow = new Date().getTime();
+	db.transcation(function(tx)
+	{
+		tx.executeSql("insert into WebKitStickyNotes2 values(?,?) ",[id, note]);
+	});
+}
+
+function loadNotesButtonHandler()
+{
+	nowe= new Date().getTime();
+	alert("about to load notes: time "+nowe);
+	showNotes();
+}
+
+</script>
+</head>
+<body onLoad="createDatabase()">
+<input type="button" onClick="createNoteTable()" value="Create Table" /><br>
+<input type="text" id="logid" placeholder="ID" ><br>
+<input type="text" id="logname" placeholder="log Name" ><br>
+<input type="button" onClick="insertData()" value="Insert Data" /><br>
+<input type="button" onClick="showNotes()" value="Show Notes" /><br>
+<h3>Total Records</h3><div id="status"></div>
+<h3>Data</h3>
+<table id="tbldata" style="border:2px solid #cecece; border-radius:10px;">
+</table>
+</body>
+</html>
